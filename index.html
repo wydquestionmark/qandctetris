@@ -212,7 +212,7 @@
 </head>
 
 <body>
- <audio id="bgMusic" loop autoplay>
+ <audio id="bgMusic" loop preload="auto">
   <source src="music.mp3" type="audio/mpeg">
 </audio>
   <main class="machine-wrap" aria-label="Quality and Conflict handheld game">
@@ -870,29 +870,27 @@ onValue(counterRef, snapshot => {
 });
 
 </script>  
-  <script>
+ <script>
 window.addEventListener("load", () => {
-
   const music = document.getElementById("bgMusic");
+  music.volume = 0.25;
+  music.loop = true;
 
-  music.volume = 0.35;
+  function startMusic(){
+    music.play().catch(err => {
+      console.log("Music could not start yet:", err);
+    });
+
+    document.removeEventListener("pointerdown", startMusic);
+    document.removeEventListener("keydown", startMusic);
+    document.removeEventListener("touchstart", startMusic);
+  }
 
   music.play().catch(() => {
-
-    /*
-      Mobile browsers usually require
-      a user interaction before audio.
-    */
-
-    document.addEventListener(
-      "pointerdown",
-      () => music.play(),
-      { once:true }
-    );
-
+    document.addEventListener("pointerdown", startMusic);
+    document.addEventListener("keydown", startMusic);
+    document.addEventListener("touchstart", startMusic);
   });
-
-});
 </script>
 </body>
 </html>
