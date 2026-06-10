@@ -185,6 +185,29 @@
       display:block;
     }
   }
+  /* GLOBAL VISITOR COUNTER */
+
+#visitorCounter{
+  position:fixed;
+  left:14px;
+  bottom:10px;
+
+  z-index:30;
+
+  color:#748047;
+
+  font-family:"Courier New", monospace;
+  font-size:12px;
+  font-weight:bold;
+
+  letter-spacing:1px;
+
+  text-shadow:0 0 4px rgba(116,128,71,.6);
+
+  opacity:.9;
+
+  pointer-events:none;
+}
 </style>
 </head>
 
@@ -209,6 +232,9 @@
   </div>
 
   <div class="hint">tap top / left / right / bottom • double tap bottom = hard drop</div>
+  <div id="visitorCounter">
+  VISITORS 000001
+</div>
 
 <script>
 (() => {
@@ -793,5 +819,6 @@
   requestAnimationFrame(update);
 })();
 </script>
+<div id="visitorCounter">VISITORS 000001</div>  
 </body>
 </html>
