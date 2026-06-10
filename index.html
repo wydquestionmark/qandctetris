@@ -85,11 +85,11 @@
   };
 
   let bag=[], current, next, score=0, lines=0, level=1, dropTimer=0, lastTime=0, gameOver=false, paused=false;
-  let clearingRows=[], clearFlash=0, clearPhase=0, fallAnim=0, fallFrom=null;
+  let clearingRows=[], clearFlash=0, clearPhase=0, fallAnim=0, dropCells=null, pendingBoard=null;
 
   function refillBag(){ bag = Object.keys(SHAPES).sort(() => Math.random() - 0.5); }
   function newPiece(){ if(!bag.length) refillBag(); const name = bag.pop(); return { name, shape:SHAPES[name].map(r=>r.slice()), x:Math.floor(COLS/2)-2, y:0 }; }
-  function reset(){ board.forEach(r=>r.fill(0)); bag=[]; current=newPiece(); next=newPiece(); score=0; lines=0; level=1; dropTimer=0; gameOver=false; paused=false; clearingRows=[]; clearFlash=0; fallAnim=0; fallFrom=null; }
+  function reset(){ board.forEach(r=>r.fill(0)); bag=[]; current=newPiece(); next=newPiece(); score=0; lines=0; level=1; dropTimer=0; gameOver=false; paused=false; clearingRows=[]; clearFlash=0; fallAnim=0; dropCells=null; pendingBoard=null; }
 
   function collide(p=current, dx=0, dy=0, shape=p.shape){
     return shape.some((row,y)=>row.some((v,x)=>{
@@ -113,21 +113,41 @@
     else spawnNext();
   }
   function finishClear(){
+    // After the blink, build the exact post-clear board and animate every
+    // surviving block from its old row into its new row. The next piece does
+    // not spawn until this drop animation finishes.
     const before = board.map(r=>r.slice());
-    const n = clearingRows.length;
-    for(const y of clearingRows.sort((a,b)=>a-b)) board[y].fill(0);
-    for(let y=ROWS-1;y>=0;y--){ if(board[y].every(v=>v===0)){ board.splice(y,1); board.unshift(Array(COLS).fill(0)); y++; } }
-    fallFrom = before; fallAnim = 1;
+    const rowsToClear = clearingRows.slice().sort((a,b)=>a-b);
+    const clearSet = new Set(rowsToClear);
+    const n = rowsToClear.length;
+
+    pendingBoard = Array.from({length:ROWS}, () => Array(COLS).fill(0));
+    dropCells = [];
+
+    for(let y=0;y<ROWS;y++){
+      if(clearSet.has(y)) continue;
+      const dropBy = rowsToClear.filter(cy => cy > y).length;
+      const destY = y + dropBy;
+      for(let x=0;x<COLS;x++){
+        const v = before[y][x];
+        if(!v) continue;
+        pendingBoard[destY][x] = v;
+        dropCells.push({x, fromY:y, toY:destY, v});
+      }
+    }
+
+    board.forEach(r=>r.fill(0));
+    fallAnim = 0;
     lines += n; score += [0,40,100,300,1200][n] * level; level = 1 + Math.floor(lines/10);
-    clearingRows=[]; spawnNext();
+    clearingRows=[];
   }
   function spawnNext(){ current=next; next=newPiece(); if(collide()) gameOver=true; }
 
-  function moveDown(){ if(clearingRows.length) return; if(!collide(current,0,1)) current.y++; else lock(); }
+  function moveDown(){ if(clearingRows.length || dropCells) return; if(!collide(current,0,1)) current.y++; else lock(); }
   function input(key){
     if(gameOver && (key==='Enter'||key===' '||key==='tap')) return reset();
     if(key==='p' || key==='P') { paused=!paused; return; }
-    if(paused || gameOver || clearingRows.length) return;
+    if(paused || gameOver || clearingRows.length || dropCells) return;
     if(key==='ArrowLeft' && !collide(current,-1,0)) current.x--;
     if(key==='ArrowRight' && !collide(current,1,0)) current.x++;
     if(key==='ArrowDown') { moveDown(); score += 1; }
@@ -170,14 +190,18 @@
     for(let y=0;y<ROWS;y++){ cell(ox-5-block*.9, oy+y*block, block*.65); cell(ox+playW+5+block*.25, oy+y*block, block*.65); }
 
     const drawBoard = (source, yOffset=0, alpha=1) => source.forEach((row,y)=>row.forEach((v,x)=>{ if(v) cell(ox+x*block, oy+(y+yOffset)*block, block, v, alpha); }));
-    if(fallAnim>0 && fallFrom) drawBoard(fallFrom, fallAnim*1.15, .35);
-    drawBoard(board, 0, 1);
+    if(dropCells){
+      const ease = 1 - Math.pow(1 - Math.min(1, fallAnim), 3);
+      dropCells.forEach(c => cell(ox+c.x*block, oy+(c.fromY + (c.toY-c.fromY)*ease)*block, block, c.v, 1));
+    } else {
+      drawBoard(board, 0, 1);
+    }
 
     if(clearingRows.length){
       const on = clearPhase % 2 === 0;
       clearingRows.forEach(y=>{ ctx.fillStyle = on ? 'rgba(18,26,8,.95)' : 'rgba(114,128,73,.85)'; ctx.fillRect(ox, oy+y*block, playW, block-1); });
     }
-    if(!gameOver && !paused && !clearingRows.length) drawShape(current.shape,current.x,current.y,block,ox,oy);
+    if(!gameOver && !paused && !clearingRows.length && !dropCells) drawShape(current.shape,current.x,current.y,block,ox,oy);
 
     function box(y,title,value){ ctx.strokeStyle='rgba(20,27,9,.95)'; ctx.lineWidth=2; ctx.strokeRect(panelX,y,sideW-margin,Math.max(40,block*3.2)); lcdText(title,panelX+(sideW-margin)/2,y+8,Math.max(10,block*.7),'center'); lcdText(value,panelX+(sideW-margin)/2,y+Math.max(24,block*1.45),Math.max(11,block*.75),'center'); }
     box(oy+6,'SCORE',String(score).padStart(6,'0'));
@@ -198,9 +222,19 @@
   function update(t=0){
     const dt = Math.min(80, t-lastTime); lastTime=t;
     if(!paused && !gameOver){
-      if(clearingRows.length){ clearFlash += dt; if(clearFlash>105){ clearFlash=0; clearPhase++; if(clearPhase>=6) finishClear(); } }
+      if(clearingRows.length){
+        clearFlash += dt;
+        if(clearFlash>105){ clearFlash=0; clearPhase++; if(clearPhase>=6) finishClear(); }
+      }
+      else if(dropCells){
+        fallAnim += dt/180;
+        if(fallAnim >= 1){
+          for(let y=0;y<ROWS;y++) board[y] = pendingBoard[y].slice();
+          dropCells=null; pendingBoard=null; fallAnim=0; dropTimer=0;
+          spawnNext();
+        }
+      }
       else { dropTimer += dt; if(dropTimer > Math.max(95, 720-(level-1)*55)){ moveDown(); dropTimer=0; } }
-      if(fallAnim>0){ fallAnim -= dt/170; if(fallAnim<=0){ fallAnim=0; fallFrom=null; } }
     }
     draw(); requestAnimationFrame(update);
   }
