@@ -40,11 +40,36 @@
 
   @media (max-width:700px){
     body{background:#000;display:block}
-    .machine-wrap{width:100vw;height:100vh;aspect-ratio:auto;box-shadow:none;background:#000}
+    .machine-wrap{
+    position:relative;
+    width:min(100vw,100vh);
+    aspect-ratio:1249/1245;
+    overflow:hidden;
+
+    background:transparent;
+    box-shadow:0 0 40px rgba(0,0,0,.9);
+
+    z-index:2;
+}
     .machine-img{display:none}
     .screen-slot{left:0;top:0;width:100vw;height:100vh;border-radius:0}
     .mobileZones,.hint{display:block}
   }
+html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+body{
+    background-image: url("tetris%20bg.png");
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+  
 </style>
 </head>
 <body>
