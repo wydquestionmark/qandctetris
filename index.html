@@ -926,27 +926,51 @@ onValue(counterRef, snapshot => {
 });
 
 </script>  
- <script>
+<script>
 window.addEventListener("load", () => {
+
   const music = document.getElementById("bgMusic");
+  const button = document.getElementById("musicButton");
+
   music.volume = 0.25;
   music.loop = true;
 
-  function startMusic(){
-    music.play().catch(err => {
-      console.log("Music could not start yet:", err);
-    });
+  let playing = false;
 
-    document.removeEventListener("pointerdown", startMusic);
-    document.removeEventListener("keydown", startMusic);
-    document.removeEventListener("touchstart", startMusic);
-  }
+  button.addEventListener("click", async () => {
 
-  music.play().catch(() => {
-    document.addEventListener("pointerdown", startMusic);
-    document.addEventListener("keydown", startMusic);
-    document.addEventListener("touchstart", startMusic);
+    if (!playing) {
+
+      try{
+        await music.play();
+
+        playing = true;
+
+        button.textContent = "MUSIC OFF";
+
+        button.style.background = "#748047";
+        button.style.color = "#151b0a";
+
+      }catch(err){
+        console.error(err);
+      }
+
+    } else {
+
+      music.pause();
+
+      playing = false;
+
+      button.textContent = "MUSIC ON";
+
+      button.style.background = "#151b0a";
+      button.style.color = "#748047";
+
+    }
+
   });
+
+});
 </script>
 <button id="musicButton">
   MUSIC ON
