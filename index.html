@@ -208,6 +208,37 @@
 
   pointer-events:none;
 }
+  #musicButton{
+  position:fixed;
+
+  right:15px;
+  bottom:10px;
+
+  z-index:100;
+
+  background:#151b0a;
+  color:#748047;
+
+  border:2px solid #748047;
+
+  padding:6px 10px;
+
+  font-family:"Courier New", monospace;
+  font-size:12px;
+  font-weight:bold;
+
+  cursor:pointer;
+
+  text-shadow:0 0 4px rgba(116,128,71,.5);
+
+  box-shadow:
+    inset 0 0 6px rgba(116,128,71,.15),
+    0 0 8px rgba(116,128,71,.15);
+}
+
+#musicButton:hover{
+  background:#20290f;
+}
 </style>
 </head>
 
@@ -215,6 +246,31 @@
  <audio id="bgMusic" loop preload="auto">
   <source src="music.mp3" type="audio/mpeg">
 </audio>
+  <script>
+const music = document.getElementById("bgMusic");
+const musicButton = document.getElementById("musicButton");
+
+let musicStarted = false;
+
+musicButton.addEventListener("click", () => {
+
+  if (!musicStarted) {
+    music.play();
+    musicStarted = true;
+    musicButton.textContent = "🔇 MUTE";
+    return;
+  }
+
+  if (music.paused) {
+    music.play();
+    musicButton.textContent = "🔇 MUTE";
+  } else {
+    music.pause();
+    musicButton.textContent = "♫ MUSIC";
+  }
+
+});
+</script>
   <main class="machine-wrap" aria-label="Quality and Conflict handheld game">
     <!-- Put old gameboy.png, tetris bg.png, and logo.png in the same GitHub folder as this HTML file. -->
     <img class="machine-img" src="old%20gameboy.png" alt="Vintage Quality and Conflict handheld" />
@@ -892,5 +948,8 @@ window.addEventListener("load", () => {
     document.addEventListener("touchstart", startMusic);
   });
 </script>
+<button id="musicButton">
+  MUSIC ON
+</button>  
 </body>
 </html>
