@@ -3,84 +3,222 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-<title>Quality & Conflict - Retro Block Game</title>
+<title>Quality & Conflict - Pocket Blocks</title>
 <style>
   :root{
-    --plastic:#d6d2cb;
-    --bezel:#5f5c66;
-    --ink:#101410;
-    --lcd:#6f7d3e;
-    --lcd-dark:#20270f;
-    --blue:#263b86;
-    --white:#fff;
+    --lcd:#748047;
+    --lcd2:#66743e;
+    --ink:#151b0a;
+    --dim:#27310f;
   }
-  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
-  html,body{height:100%; margin:0; background:#000; color:#fff; font-family:"Arial Narrow","Helvetica Neue",Arial,sans-serif; overflow:hidden}
-  body{display:flex; align-items:center; justify-content:center}
-  .stage{width:100vw; height:100vh; display:grid; grid-template-columns:minmax(180px,22vw) minmax(340px,62vw) minmax(180px,22vw); align-items:center; gap:2vw; padding:2vh 2vw; background:#000}
-  .side{font-weight:700; letter-spacing:-.04em; font-size:clamp(14px,1.5vw,22px); line-height:1.9}
-  .side h2{font-size:clamp(18px,1.5vw,25px); margin:0 0 1.5rem; color:#fff}
-  .leader{justify-self:end; min-width:220px}.leader .row{display:grid; grid-template-columns:1fr auto; gap:2rem}
-  .arrow{font-size:2rem; display:inline-block; width:2.1rem; text-align:center; vertical-align:-.15rem}
-  .device{width:min(62vw,900px); aspect-ratio:1.02/1; position:relative; background:linear-gradient(110deg,#c8c3bb,#ebe7df 45%,#bbb6af); border-radius:2rem; padding:3.2% 5% 4%; box-shadow:inset 0 0 14px #8d8981,0 0 12px #111}
-  .bezel{position:absolute; left:13%; top:3.5%; width:74%; height:49%; background:var(--bezel); border-radius:.25rem 0 .25rem .9rem; box-shadow:inset 0 0 8px #333; padding:4.5% 7% 6% 18%}
-  .motto{position:absolute; top:1%; left:26%; right:10%; color:#ececec; text-align:center; font-size:clamp(11px,1.5vw,22px); letter-spacing:.22em; white-space:nowrap}
-  .stripes:before,.stripes:after{content:""; position:absolute; top:1.4%; width:17%; height:10px; border-top:3px solid #9d214a; border-bottom:3px solid #263b86}.stripes:before{left:16%}.stripes:after{right:11%}
-  .battery{position:absolute; left:4.5%; top:28%; color:#d4d1d1; font-size:clamp(11px,1.4vw,20px); letter-spacing:.08em}.led{width:18px; height:18px; border-radius:50%; background:radial-gradient(circle at 30% 25%,#ffd7a6,#ed5238 42%,#711 75%); margin:0 auto 1.7rem; box-shadow:0 0 8px #f35}
-  .screen{width:100%; height:100%; background:var(--lcd); border:4px solid #252525; box-shadow:inset 0 0 18px rgba(0,0,0,.45); position:relative; overflow:hidden}
-  canvas{display:block; width:100%; height:100%; image-rendering:pixelated; filter:contrast(1.05) saturate(.65)}
-  .scan{pointer-events:none; position:absolute; inset:0; background:repeating-linear-gradient(to bottom,rgba(255,255,255,.04) 0 1px,rgba(0,0,0,.04) 1px 3px)}
-  .brand{position:absolute; top:56%; left:10%; color:var(--blue); font-weight:900; font-size:clamp(18px,2.2vw,36px); letter-spacing:-.05em}.brand i{font-size:1.55em; font-weight:400; letter-spacing:.02em}.brand small{font-size:.42em; vertical-align:super}
-  .dpad{position:absolute; left:14%; bottom:9%; width:20%; aspect-ratio:1}.dpad:before,.dpad:after{content:""; position:absolute; background:#15181b; border-radius:.45rem; box-shadow:inset 0 0 8px #444,0 5px 5px rgba(0,0,0,.25)}.dpad:before{left:35%; width:30%; height:100%}.dpad:after{top:35%; width:100%; height:30%}
-  .btn{position:absolute; bottom:12%; width:10%; aspect-ratio:1; border-radius:50%; background:radial-gradient(circle at 35% 30%,#b84c70,#78334b); box-shadow:inset 0 0 8px #391826,0 5px 5px rgba(0,0,0,.25)}.btn.a{right:9%; bottom:15%}.btn.b{right:25%; bottom:9%}
-  .mobileZones{display:none; position:fixed; inset:0; z-index:5}.zone{position:absolute}.zLeft{left:0; top:33%; width:33%; height:34%}.zRight{right:0; top:33%; width:33%; height:34%}.zTop{left:0; right:0; top:0; height:33%}.zBottom{left:0; right:0; bottom:0; height:34%}
-  .tapHint{display:none}
-  @media (max-width:760px){
-    body{background:#111}.stage{display:block; padding:0; background:#111}.side,.brand,.dpad,.btn,.battery,.motto,.stripes{display:none}.device{width:100vw; height:100vh; aspect-ratio:auto; border-radius:0; padding:0; background:#111}.bezel{position:static; width:100vw; height:100vh; padding:0; border-radius:0; background:#111}.screen{width:100vw; height:100vh; border:0}.mobileZones{display:block}.tapHint{display:block; position:fixed; left:0; right:0; bottom:8px; text-align:center; color:rgba(255,255,255,.45); font-size:12px; z-index:6; pointer-events:none}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+  html,body{margin:0;height:100%;overflow:hidden;background:#050505;color:white;font-family:"Arial Narrow","Helvetica Neue",Arial,sans-serif}
+  body{display:flex;align-items:center;justify-content:center}
+
+  .machine-wrap{position:relative;width:min(100vw,100vh);aspect-ratio:1249/1245;overflow:hidden;background:#111;box-shadow:0 0 40px rgba(0,0,0,.9)}
+  .machine-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;user-select:none;pointer-events:none}
+
+  /* This rectangle is matched to the empty black square in old gameboy.png.
+     Adjust these four percentages only if your GitHub image is cropped differently. */
+  .screen-slot{
+    position:absolute;
+    left:22.58%; top:5.62%; width:54.93%; height:49.96%;
+    background:#000;
+    overflow:hidden;
+    border-radius:0;
+  }
+  .lcd-shell{position:absolute;inset:0;background:radial-gradient(circle at 45% 38%,rgba(146,157,91,.55),rgba(91,103,52,.95));box-shadow:inset 0 0 30px rgba(0,0,0,.8)}
+  canvas{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;filter:contrast(1.18) saturate(.55) sepia(.18)}
+  .glass{pointer-events:none;position:absolute;inset:0;background:
+    linear-gradient(110deg,rgba(255,255,255,.06),transparent 22%,transparent 75%,rgba(0,0,0,.12)),
+    repeating-linear-gradient(to bottom,rgba(255,255,255,.035) 0 1px,rgba(0,0,0,.06) 1px 3px);
+    mix-blend-mode:multiply}
+  .vignette{pointer-events:none;position:absolute;inset:0;box-shadow:inset 0 0 20px 6px rgba(0,0,0,.35)}
+
+  .mobileZones{position:fixed;inset:0;z-index:20;display:none}.zone{position:absolute}.zTop{left:0;top:0;width:100%;height:30%}.zLeft{left:0;top:30%;width:35%;height:40%}.zRight{right:0;top:30%;width:35%;height:40%}.zBottom{left:0;bottom:0;width:100%;height:30%}
+  .hint{display:none;position:fixed;z-index:21;left:0;right:0;bottom:8px;text-align:center;color:rgba(255,255,255,.55);font-size:12px;text-shadow:0 1px 3px #000;pointer-events:none}
+
+  @media (max-width:700px){
+    body{background:#000;display:block}
+    .machine-wrap{width:100vw;height:100vh;aspect-ratio:auto;box-shadow:none;background:#000}
+    .machine-img{display:none}
+    .screen-slot{left:0;top:0;width:100vw;height:100vh;border-radius:0}
+    .mobileZones,.hint{display:block}
   }
 </style>
 </head>
 <body>
-  <main class="stage">
-    <section class="side controls"><h2>CONTROLS</h2><div><span class="arrow">←</span>= MOVE LEFT</div><div><span class="arrow">→</span>= MOVE RIGHT</div><div><span class="arrow">↑</span>= ROTATE</div><div><span class="arrow">↓</span>= SOFT DROP (FALL FASTER)</div><div>SPACE = HARD DROP</div></section>
-    <section class="device stripes">
-      <div class="motto">BE THE FRIEND YOU WANT TO HAVE</div>
-      <div class="bezel"><div class="battery"><div class="led"></div>BATTERY</div><div class="screen"><canvas id="game"></canvas><div class="scan"></div></div></div>
-      <div class="brand">Quality &amp; <i>CONFLCT</i><small>™</small></div><div class="dpad"></div><div class="btn b"></div><div class="btn a"></div>
+  <main class="machine-wrap" aria-label="Quality and Conflict handheld game">
+    <!-- Put old gameboy.png in the same GitHub folder as this HTML file. -->
+    <img class="machine-img" src="old%20gameboy.png" alt="Vintage Quality and Conflict handheld" />
+    <section class="screen-slot" aria-label="Game screen">
+      <div class="lcd-shell"></div>
+      <canvas id="game"></canvas>
+      <div class="glass"></div><div class="vignette"></div>
     </section>
-    <section class="side leader"><h2>TOP 5 LEADERBOARD</h2><div id="leaderboard"></div></section>
   </main>
-  <div class="mobileZones"><div class="zone zTop" data-key="ArrowUp"></div><div class="zone zLeft" data-key="ArrowLeft"></div><div class="zone zRight" data-key="ArrowRight"></div><div class="zone zBottom" data-key="ArrowDown"></div></div><div class="tapHint">Tap top/left/right/bottom. Double tap bottom = hard drop.</div>
+
+  <div class="mobileZones" aria-hidden="true">
+    <div class="zone zTop" data-key="ArrowUp"></div>
+    <div class="zone zLeft" data-key="ArrowLeft"></div>
+    <div class="zone zRight" data-key="ArrowRight"></div>
+    <div class="zone zBottom" data-key="ArrowDown"></div>
+  </div>
+  <div class="hint">tap top / left / right / bottom • double tap bottom = hard drop</div>
+
 <script>
 (() => {
-  const COLS=10, ROWS=20, BLOCK=16;
-  const canvas=document.getElementById('game'), ctx=canvas.getContext('2d');
-  const board=Array.from({length:ROWS},()=>Array(COLS).fill(0));
-  const colors=['','#1b210d','#20270f','#283012','#11170a','#303916','#222b10','#151b0b'];
-  const pieces={
-    I:[[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]], J:[[2,0,0],[2,2,2],[0,0,0]], L:[[0,0,3],[3,3,3],[0,0,0]],
-    O:[[4,4],[4,4]], S:[[0,5,5],[5,5,0],[0,0,0]], T:[[0,6,0],[6,6,6],[0,0,0]], Z:[[7,7,0],[0,7,7],[0,0,0]]
+  'use strict';
+  const COLS = 10, ROWS = 20;
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d', { alpha:false });
+  const board = Array.from({length:ROWS}, () => Array(COLS).fill(0));
+
+  const SHAPES = {
+    I:[[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],
+    J:[[2,0,0],[2,2,2],[0,0,0]],
+    L:[[0,0,3],[3,3,3],[0,0,0]],
+    O:[[4,4],[4,4]],
+    S:[[0,5,5],[5,5,0],[0,0,0]],
+    T:[[0,6,0],[6,6,6],[0,0,0]],
+    Z:[[7,7,0],[0,7,7],[0,0,0]]
   };
-  const names=Object.keys(pieces); let bag=[], score=0, lines=0, level=1, drop=0, last=0, over=false, paused=false;
-  const randPiece=()=>{ if(!bag.length) bag=[...names].sort(()=>Math.random()-.5); const n=bag.pop(); return {name:n, shape:pieces[n].map(r=>[...r]), x:Math.floor(COLS/2)-2, y:0}; };
-  let current=randPiece(), next=randPiece();
-  function resize(){ const r=canvas.getBoundingClientRect(); const scale=Math.floor(Math.min(r.width/(COLS*BLOCK+90), r.height/(ROWS*BLOCK+16)))||1; canvas.width=Math.floor(r.width); canvas.height=Math.floor(r.height); ctx.imageSmoothingEnabled=false; draw(); }
-  addEventListener('resize',resize); setTimeout(resize,50);
-  function collide(p=current,ox=0,oy=0,s=p.shape){return s.some((row,y)=>row.some((v,x)=>v&&(p.x+x+ox<0||p.x+x+ox>=COLS||p.y+y+oy>=ROWS||board[p.y+y+oy]?.[p.x+x+ox])))}
-  function merge(){ current.shape.forEach((r,y)=>r.forEach((v,x)=>{if(v&&current.y+y>=0) board[current.y+y][current.x+x]=v;})); }
-  function clearLines(){ let n=0; for(let y=ROWS-1;y>=0;y--) if(board[y].every(Boolean)){board.splice(y,1); board.unshift(Array(COLS).fill(0)); n++; y++;} if(n){lines+=n; score += [0,40,100,300,1200][n]*level; level=1+Math.floor(lines/10);} }
-  function rotate(){ const s=current.shape, r=s[0].map((_,i)=>s.map(row=>row[i]).reverse()); const old=current.shape; current.shape=r; if(collide()){current.x++; if(collide()){current.x-=2; if(collide()){current.x++; current.shape=old;}}} }
-  function hardDrop(){ while(!collide(current,0,1)) current.y++; lock(); }
-  function lock(){ merge(); clearLines(); current=next; next=randPiece(); if(collide()) over=true; }
-  function step(t=0){ if(!paused&&!over){ drop+=t-last; if(drop>Math.max(80,650-(level-1)*55)){ if(!collide(current,0,1)) current.y++; else lock(); drop=0; }} last=t; draw(); requestAnimationFrame(step); }
-  function cell(x,y,v,offX,offY){ const px=offX+x*BLOCK, py=offY+y*BLOCK; ctx.fillStyle=colors[v]; ctx.fillRect(px,py,BLOCK-1,BLOCK-1); ctx.strokeStyle='rgba(7,10,5,.42)'; ctx.strokeRect(px+.5,py+.5,BLOCK-2,BLOCK-2); ctx.fillStyle='rgba(255,255,255,.08)'; ctx.fillRect(px+2,py+2,BLOCK-5,2); }
-  function draw(){ const w=canvas.width,h=canvas.height; ctx.fillStyle='#6f7d3e'; ctx.fillRect(0,0,w,h); ctx.fillStyle='rgba(30,39,15,.12)'; for(let y=0;y<h;y+=3) ctx.fillRect(0,y,w,1); const boardW=COLS*BLOCK, boardH=ROWS*BLOCK, offX=Math.max(8,Math.floor((w-boardW-78)/2)), offY=Math.floor((h-boardH)/2); ctx.strokeStyle='#1b210d'; ctx.lineWidth=3; ctx.strokeRect(offX-4,offY-4,boardW+8,boardH+8); board.forEach((r,y)=>r.forEach((v,x)=>v&&cell(x,y,v,offX,offY))); current.shape.forEach((r,y)=>r.forEach((v,x)=>v&&cell(current.x+x,current.y+y,v,offX,offY))); ctx.fillStyle='#1b210d'; ctx.font='12px monospace'; ctx.fillText('SCORE',offX+boardW+16,offY+14); ctx.fillText(String(score).padStart(6,'0'),offX+boardW+16,offY+30); ctx.fillText('LEVEL '+level,offX+boardW+16,offY+58); ctx.fillText('LINES '+lines,offX+boardW+16,offY+76); ctx.fillText('NEXT',offX+boardW+16,offY+110); next.shape.forEach((r,y)=>r.forEach((v,x)=>{if(v)cell(x,y,v,offX+boardW+20,offY+122)})); if(over||paused){ ctx.fillStyle='rgba(111,125,62,.86)'; ctx.fillRect(offX+12,offY+128,boardW-24,64); ctx.fillStyle='#11170a'; ctx.textAlign='center'; ctx.font='16px monospace'; ctx.fillText(over?'GAME OVER':'PAUSED',offX+boardW/2,offY+155); ctx.font='10px monospace'; ctx.fillText('ENTER / TAP TO RESTART',offX+boardW/2,offY+176); ctx.textAlign='left'; }}
-  function restart(){ board.forEach(r=>r.fill(0)); score=lines=0; level=1; bag=[]; current=randPiece(); next=randPiece(); over=false; paused=false; }
-  function input(key){ if(over && (key==='Enter'||key===' '||key==='tap')) return restart(); if(key==='p') return paused=!paused; if(paused) return; if(key==='ArrowLeft'&&!collide(current,-1,0)) current.x--; if(key==='ArrowRight'&&!collide(current,1,0)) current.x++; if(key==='ArrowDown'){ if(!collide(current,0,1)) current.y++; else lock(); } if(key==='ArrowUp') rotate(); if(key===' ') hardDrop(); draw(); }
-  addEventListener('keydown',e=>{ if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' '].includes(e.key)) e.preventDefault(); input(e.key); });
-  let lastBottomTap=0; document.querySelectorAll('.zone').forEach(z=>z.addEventListener('pointerdown',e=>{ e.preventDefault(); const k=z.dataset.key; if(over) return input('tap'); if(k==='ArrowDown'){ const now=Date.now(); if(now-lastBottomTap<280){input(' '); lastBottomTap=0;} else {input('ArrowDown'); lastBottomTap=now;} } else input(k); }));
-  const scores=JSON.parse(localStorage.getItem('qc-tetris-scores')||'[5000,3000,1500,900,400]'); document.getElementById('leaderboard').innerHTML=scores.slice(0,5).map((s,i)=>`<div class="row"><span>USERNAME ${i+1}</span><span>${s}</span></div>`).join('');
-  step();
+
+  let bag=[], current, next, score=0, lines=0, level=1, dropTimer=0, lastTime=0, gameOver=false, paused=false;
+  let clearingRows=[], clearFlash=0, clearPhase=0, fallAnim=0, fallFrom=null;
+
+  function refillBag(){ bag = Object.keys(SHAPES).sort(() => Math.random() - 0.5); }
+  function newPiece(){ if(!bag.length) refillBag(); const name = bag.pop(); return { name, shape:SHAPES[name].map(r=>r.slice()), x:Math.floor(COLS/2)-2, y:0 }; }
+  function reset(){ board.forEach(r=>r.fill(0)); bag=[]; current=newPiece(); next=newPiece(); score=0; lines=0; level=1; dropTimer=0; gameOver=false; paused=false; clearingRows=[]; clearFlash=0; fallAnim=0; fallFrom=null; }
+
+  function collide(p=current, dx=0, dy=0, shape=p.shape){
+    return shape.some((row,y)=>row.some((v,x)=>{
+      if(!v) return false;
+      const nx=p.x+x+dx, ny=p.y+y+dy;
+      return nx<0 || nx>=COLS || ny>=ROWS || (ny>=0 && board[ny][nx]);
+    }));
+  }
+  function merge(){ current.shape.forEach((row,y)=>row.forEach((v,x)=>{ if(v && current.y+y>=0) board[current.y+y][current.x+x]=v; })); }
+  function rotate(){
+    const old=current.shape, rotated=old[0].map((_,i)=>old.map(r=>r[i]).reverse());
+    current.shape=rotated;
+    if(collide()){ current.x++; if(collide()){ current.x-=2; if(collide()){ current.x++; current.shape=old; } } }
+  }
+  function hardDrop(){ if(clearingRows.length) return; while(!collide(current,0,1)) current.y++; lock(); }
+  function lock(){ merge(); startClearOrSpawn(); }
+
+  function startClearOrSpawn(){
+    const full=[]; for(let y=0;y<ROWS;y++) if(board[y].every(Boolean)) full.push(y);
+    if(full.length){ clearingRows=full; clearFlash=0; clearPhase=0; }
+    else spawnNext();
+  }
+  function finishClear(){
+    const before = board.map(r=>r.slice());
+    const n = clearingRows.length;
+    for(const y of clearingRows.sort((a,b)=>a-b)) board[y].fill(0);
+    for(let y=ROWS-1;y>=0;y--){ if(board[y].every(v=>v===0)){ board.splice(y,1); board.unshift(Array(COLS).fill(0)); y++; } }
+    fallFrom = before; fallAnim = 1;
+    lines += n; score += [0,40,100,300,1200][n] * level; level = 1 + Math.floor(lines/10);
+    clearingRows=[]; spawnNext();
+  }
+  function spawnNext(){ current=next; next=newPiece(); if(collide()) gameOver=true; }
+
+  function moveDown(){ if(clearingRows.length) return; if(!collide(current,0,1)) current.y++; else lock(); }
+  function input(key){
+    if(gameOver && (key==='Enter'||key===' '||key==='tap')) return reset();
+    if(key==='p' || key==='P') { paused=!paused; return; }
+    if(paused || gameOver || clearingRows.length) return;
+    if(key==='ArrowLeft' && !collide(current,-1,0)) current.x--;
+    if(key==='ArrowRight' && !collide(current,1,0)) current.x++;
+    if(key==='ArrowDown') { moveDown(); score += 1; }
+    if(key==='ArrowUp') rotate();
+    if(key===' ') hardDrop();
+  }
+
+  function resize(){ const r=canvas.getBoundingClientRect(); canvas.width=Math.max(320,Math.floor(r.width)); canvas.height=Math.max(240,Math.floor(r.height)); ctx.imageSmoothingEnabled=false; draw(); }
+  addEventListener('resize', resize);
+
+  function lcdText(text,x,y,size=11,align='left'){
+    ctx.save(); ctx.fillStyle='rgba(18,26,8,.96)'; ctx.font=`bold ${size}px "Courier New", monospace`; ctx.textAlign=align; ctx.textBaseline='top'; ctx.fillText(text,x,y); ctx.restore();
+  }
+  function cell(px,py,s,v=1,alpha=1){
+    ctx.save(); ctx.globalAlpha=alpha; ctx.fillStyle='rgba(19,26,8,.96)'; ctx.fillRect(px,py,s-1,s-1);
+    ctx.fillStyle='rgba(105,121,58,.32)'; const inset=Math.max(2,Math.floor(s*.22)); ctx.fillRect(px+inset,py+inset,s-inset*2-1,s-inset*2-1);
+    ctx.strokeStyle='rgba(5,8,2,.65)'; ctx.lineWidth=Math.max(1,Math.floor(s/12)); ctx.strokeRect(px+.5,py+.5,s-2,s-2); ctx.restore();
+  }
+  function drawShape(shape,x,y,s,ox,oy,alpha=1){ shape.forEach((row,yy)=>row.forEach((v,xx)=>{ if(v) cell(ox+(x+xx)*s, oy+(y+yy)*s, s, v, alpha); })); }
+
+  function draw(){
+    const w=canvas.width, h=canvas.height;
+    ctx.fillStyle='#718049'; ctx.fillRect(0,0,w,h);
+    const isPhone = matchMedia('(max-width:700px)').matches;
+    const margin = Math.max(8, Math.floor(Math.min(w,h)*.035));
+    const sideW = isPhone ? Math.max(72, Math.floor(w*.24)) : Math.max(86, Math.floor(w*.26));
+    const boardH = h - margin*2;
+    const block = Math.floor(Math.min((w - margin*3 - sideW)/COLS, boardH/ROWS));
+    const playW = block*COLS, playH = block*ROWS;
+    const ox = isPhone ? margin : Math.floor((w - playW - sideW - margin)/2);
+    const oy = Math.floor((h - playH)/2);
+    const panelX = ox + playW + margin;
+
+    // old LCD texture
+    ctx.fillStyle='rgba(25,32,12,.08)'; for(let y=0;y<h;y+=3) ctx.fillRect(0,y,w,1);
+    ctx.fillStyle='rgba(255,255,255,.035)'; for(let x=0;x<w;x+=5) ctx.fillRect(x,0,1,h);
+
+    ctx.strokeStyle='rgba(20,27,9,.95)'; ctx.lineWidth=Math.max(2,Math.floor(block*.15)); ctx.strokeRect(ox-5,oy-5,playW+10,playH+10);
+    ctx.lineWidth=Math.max(1,Math.floor(block*.07));
+    for(let y=0;y<ROWS;y++){ cell(ox-5-block*.9, oy+y*block, block*.65); cell(ox+playW+5+block*.25, oy+y*block, block*.65); }
+
+    const drawBoard = (source, yOffset=0, alpha=1) => source.forEach((row,y)=>row.forEach((v,x)=>{ if(v) cell(ox+x*block, oy+(y+yOffset)*block, block, v, alpha); }));
+    if(fallAnim>0 && fallFrom) drawBoard(fallFrom, fallAnim*1.15, .35);
+    drawBoard(board, 0, 1);
+
+    if(clearingRows.length){
+      const on = clearPhase % 2 === 0;
+      clearingRows.forEach(y=>{ ctx.fillStyle = on ? 'rgba(18,26,8,.95)' : 'rgba(114,128,73,.85)'; ctx.fillRect(ox, oy+y*block, playW, block-1); });
+    }
+    if(!gameOver && !paused && !clearingRows.length) drawShape(current.shape,current.x,current.y,block,ox,oy);
+
+    function box(y,title,value){ ctx.strokeStyle='rgba(20,27,9,.95)'; ctx.lineWidth=2; ctx.strokeRect(panelX,y,sideW-margin,Math.max(40,block*3.2)); lcdText(title,panelX+(sideW-margin)/2,y+8,Math.max(10,block*.7),'center'); lcdText(value,panelX+(sideW-margin)/2,y+Math.max(24,block*1.45),Math.max(11,block*.75),'center'); }
+    box(oy+6,'SCORE',String(score).padStart(6,'0'));
+    box(oy+6+block*4.1,'LEVEL',String(level).padStart(2,'0'));
+    box(oy+6+block*8.2,'LINES',String(lines).padStart(3,'0'));
+    const nx=panelX, ny=oy+playH-block*5.2, nw=sideW-margin;
+    ctx.strokeRect(nx,ny,nw,block*4.8); ctx.strokeRect(nx+5,ny+5,nw-10,block*4.8-10);
+    drawShape(next.shape,1,1,Math.max(8,Math.floor(block*.78)),nx+Math.floor(nw*.17),ny+Math.floor(block*.75));
+
+    if(gameOver || paused){
+      ctx.fillStyle='rgba(112,128,73,.86)'; ctx.fillRect(ox+block,oy+block*8,playW-block*2,block*4);
+      ctx.strokeStyle='rgba(20,27,9,.95)'; ctx.strokeRect(ox+block,oy+block*8,playW-block*2,block*4);
+      lcdText(gameOver?'GAME OVER':'PAUSED',ox+playW/2,oy+block*8.8,Math.max(13,block*.9),'center');
+      lcdText('ENTER / TAP',ox+playW/2,oy+block*10.15,Math.max(9,block*.55),'center');
+    }
+  }
+
+  function update(t=0){
+    const dt = Math.min(80, t-lastTime); lastTime=t;
+    if(!paused && !gameOver){
+      if(clearingRows.length){ clearFlash += dt; if(clearFlash>105){ clearFlash=0; clearPhase++; if(clearPhase>=6) finishClear(); } }
+      else { dropTimer += dt; if(dropTimer > Math.max(95, 720-(level-1)*55)){ moveDown(); dropTimer=0; } }
+      if(fallAnim>0){ fallAnim -= dt/170; if(fallAnim<=0){ fallAnim=0; fallFrom=null; } }
+    }
+    draw(); requestAnimationFrame(update);
+  }
+
+  addEventListener('keydown', e => { if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' '].includes(e.key)) e.preventDefault(); input(e.key); });
+  let lastBottomTap=0;
+  document.querySelectorAll('.zone').forEach(z=>z.addEventListener('pointerdown', e=>{
+    e.preventDefault();
+    const k=z.dataset.key;
+    if(gameOver) return input('tap');
+    if(k==='ArrowDown'){
+      const now=Date.now();
+      if(now-lastBottomTap<300){ input(' '); lastBottomTap=0; }
+      else { input('ArrowDown'); lastBottomTap=now; }
+    } else input(k);
+  }));
+
+  reset(); resize(); requestAnimationFrame(update);
 })();
 </script>
 </body>
