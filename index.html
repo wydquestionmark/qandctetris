@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
 <title>Quality & Conflict - Pocket Blocks</title>
+
 <style>
   :root{
     --lcd:#748047;
@@ -11,75 +12,192 @@
     --ink:#151b0a;
     --dim:#27310f;
   }
-  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
-  html,body{margin:0;height:100%;overflow:hidden;background:#050505;color:white;font-family:"Arial Narrow","Helvetica Neue",Arial,sans-serif}
-  body{display:flex;align-items:center;justify-content:center}
 
-  .machine-wrap{position:relative;width:min(100vw,100vh);aspect-ratio:1249/1245;overflow:hidden;background:#111;box-shadow:0 0 40px rgba(0,0,0,.9)}
-  .machine-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;user-select:none;pointer-events:none}
+  *{
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
+    touch-action:manipulation;
+  }
 
-  /* This rectangle is matched to the empty black square in old gameboy.png.
-     Adjust these four percentages only if your GitHub image is cropped differently. */
+  html,
+  body{
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    font-family:"Arial Narrow","Helvetica Neue",Arial,sans-serif;
+  }
+
+  body{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#02030a;
+    color:white;
+  }
+
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background-image:url("tetris%20bg.png");
+    background-size:cover;
+    background-position:center center;
+    background-repeat:no-repeat;
+    z-index:0;
+  }
+
+  body::after{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.42);
+    z-index:1;
+    pointer-events:none;
+  }
+
+  .machine-wrap{
+    position:relative;
+    width:min(96vw,96vh);
+    aspect-ratio:1249/1245;
+    overflow:hidden;
+    background:transparent;
+    z-index:2;
+    filter:drop-shadow(0 18px 40px rgba(0,0,0,.75));
+  }
+
+  .machine-img{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+    user-select:none;
+    pointer-events:none;
+  }
+
+  /*
+    This rectangle is matched to the empty black square / LCD area in old gameboy.png.
+    If your GitHub image is cropped differently, adjust only these four values.
+  */
   .screen-slot{
     position:absolute;
-    left:22.58%; top:5.62%; width:54.93%; height:49.96%;
+    left:22.58%;
+    top:5.62%;
+    width:54.93%;
+    height:49.96%;
     background:#000;
     overflow:hidden;
     border-radius:0;
   }
-<canvas id="game"></canvas>
-  canvas{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;filter:contrast(1.18) saturate(.55) sepia(.18)}
-  .glass{pointer-events:none;position:absolute;inset:0;background:
-    linear-gradient(110deg,rgba(255,255,255,.06),transparent 22%,transparent 75%,rgba(0,0,0,.12)),
-    repeating-linear-gradient(to bottom,rgba(255,255,255,.035) 0 1px,rgba(0,0,0,.06) 1px 3px);
-    mix-blend-mode:multiply}
-  .vignette{pointer-events:none;position:absolute;inset:0;box-shadow:inset 0 0 20px 6px rgba(0,0,0,.35)}
 
-  .mobileZones{position:fixed;inset:0;z-index:20;display:none}.zone{position:absolute}.zTop{left:0;top:0;width:100%;height:30%}.zLeft{left:0;top:30%;width:35%;height:40%}.zRight{right:0;top:30%;width:35%;height:40%}.zBottom{left:0;bottom:0;width:100%;height:30%}
-  .hint{display:none;position:fixed;z-index:21;left:0;right:0;bottom:8px;text-align:center;color:rgba(255,255,255,.55);font-size:12px;text-shadow:0 1px 3px #000;pointer-events:none}
+  .lcd-shell{
+    position:absolute;
+    inset:0;
+    background:
+      radial-gradient(circle at 45% 38%,rgba(146,157,91,.62),rgba(91,103,52,.96)),
+      linear-gradient(180deg,rgba(255,255,255,.08),rgba(0,0,0,.08));
+    box-shadow:
+      inset 0 0 30px rgba(0,0,0,.82),
+      inset 0 0 8px rgba(0,0,0,.55);
+  }
+
+  canvas{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    image-rendering:pixelated;
+    filter:contrast(1.18) saturate(.55) sepia(.18);
+  }
+
+  .glass{
+    pointer-events:none;
+    position:absolute;
+    inset:0;
+    background:
+      linear-gradient(110deg,rgba(255,255,255,.06),transparent 22%,transparent 75%,rgba(0,0,0,.12)),
+      repeating-linear-gradient(to bottom,rgba(255,255,255,.035) 0 1px,rgba(0,0,0,.06) 1px 3px);
+    mix-blend-mode:multiply;
+  }
+
+  .vignette{
+    pointer-events:none;
+    position:absolute;
+    inset:0;
+    box-shadow:inset 0 0 20px 6px rgba(0,0,0,.35);
+  }
+
+  .mobileZones{
+    position:fixed;
+    inset:0;
+    z-index:20;
+    display:none;
+  }
+
+  .zone{position:absolute;}
+  .zTop{left:0;top:0;width:100%;height:30%;}
+  .zLeft{left:0;top:30%;width:35%;height:40%;}
+  .zRight{right:0;top:30%;width:35%;height:40%;}
+  .zBottom{left:0;bottom:0;width:100%;height:30%;}
+
+  .hint{
+    display:none;
+    position:fixed;
+    z-index:21;
+    left:0;
+    right:0;
+    bottom:8px;
+    text-align:center;
+    color:rgba(255,255,255,.55);
+    font-size:12px;
+    text-shadow:0 1px 3px #000;
+    pointer-events:none;
+  }
 
   @media (max-width:700px){
-    body{background:#000;display:block}
+    body::before{
+      background-size:cover;
+    }
+
     .machine-wrap{
-    position:relative;
-    width:min(100vw,100vh);
-    aspect-ratio:1249/1245;
-    overflow:hidden;
+      width:100vw;
+      height:100vh;
+      aspect-ratio:auto;
+      filter:none;
+    }
 
-    background:transparent;
-    box-shadow:0 0 40px rgba(0,0,0,.9);
+    .machine-img{
+      display:none;
+    }
 
-    z-index:2;
-}
-    .machine-img{display:none}
-    .screen-slot{left:0;top:0;width:100vw;height:100vh;border-radius:0}
-    .mobileZones,.hint{display:block}
+    .screen-slot{
+      left:0;
+      top:0;
+      width:100vw;
+      height:100vh;
+      border-radius:0;
+    }
+
+    .mobileZones,
+    .hint{
+      display:block;
+    }
   }
-html, body {
-    margin: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-}
-
-body{
-    background-image: url("tetris%20bg.png");
-    background-size: cover;
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-}
-  
 </style>
 </head>
+
 <body>
   <main class="machine-wrap" aria-label="Quality and Conflict handheld game">
-    <!-- Put old gameboy.png in the same GitHub folder as this HTML file. -->
+    <!-- Put old gameboy.png, tetris bg.png, and logo.png in the same GitHub folder as this HTML file. -->
     <img class="machine-img" src="old%20gameboy.png" alt="Vintage Quality and Conflict handheld" />
+
     <section class="screen-slot" aria-label="Game screen">
       <div class="lcd-shell"></div>
       <canvas id="game"></canvas>
-      <div class="glass"></div><div class="vignette"></div>
+      <div class="glass"></div>
+      <div class="vignette"></div>
     </section>
   </main>
 
@@ -89,14 +207,23 @@ body{
     <div class="zone zRight" data-key="ArrowRight"></div>
     <div class="zone zBottom" data-key="ArrowDown"></div>
   </div>
+
   <div class="hint">tap top / left / right / bottom • double tap bottom = hard drop</div>
 
 <script>
 (() => {
   'use strict';
-  const COLS = 10, ROWS = 20;
+
+  const COLS = 10;
+  const ROWS = 20;
+
   const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d', { alpha:false });
+
+  const logoImage = new Image();
+  logoImage.src = 'logo.png';
+  logoImage.onload = () => draw();
+
   const board = Array.from({length:ROWS}, () => Array(COLS).fill(0));
 
   const SHAPES = {
@@ -109,175 +236,561 @@ body{
     Z:[[7,7,0],[0,7,7],[0,0,0]]
   };
 
-  let bag=[], current, next, score=0, lines=0, level=1, dropTimer=0, lastTime=0, gameOver=false, paused=false;
-  let clearingRows=[], clearFlash=0, clearPhase=0, fallAnim=0, dropCells=null, pendingBoard=null;
+  let bag = [];
+  let current;
+  let next;
 
-  function refillBag(){ bag = Object.keys(SHAPES).sort(() => Math.random() - 0.5); }
-  function newPiece(){ if(!bag.length) refillBag(); const name = bag.pop(); return { name, shape:SHAPES[name].map(r=>r.slice()), x:Math.floor(COLS/2)-2, y:0 }; }
-  function reset(){ board.forEach(r=>r.fill(0)); bag=[]; current=newPiece(); next=newPiece(); score=0; lines=0; level=1; dropTimer=0; gameOver=false; paused=false; clearingRows=[]; clearFlash=0; fallAnim=0; dropCells=null; pendingBoard=null; }
+  let score = 0;
+  let lines = 0;
+  let level = 1;
 
-  function collide(p=current, dx=0, dy=0, shape=p.shape){
-    return shape.some((row,y)=>row.some((v,x)=>{
-      if(!v) return false;
-      const nx=p.x+x+dx, ny=p.y+y+dy;
-      return nx<0 || nx>=COLS || ny>=ROWS || (ny>=0 && board[ny][nx]);
+  let dropTimer = 0;
+  let lastTime = 0;
+
+  let gameOver = false;
+  let paused = false;
+
+  /*
+    Clear animation state:
+    playing  -> normal movement
+    blinking -> completed row flashes
+    dropping -> row is already removed, board is visually sliding down
+  */
+  let clearState = 'playing';
+  let clearingRows = [];
+  let blinkTimer = 0;
+  let blinkPhase = 0;
+  let dropAnim = 0;
+  let dropPixels = 0;
+  let boardBeforeDrop = null;
+
+  function refillBag(){
+    bag = Object.keys(SHAPES).sort(() => Math.random() - 0.5);
+  }
+
+  function cloneShape(shape){
+    return shape.map(row => row.slice());
+  }
+
+  function newPiece(){
+    if(!bag.length) refillBag();
+    const name = bag.pop();
+    return {
+      name,
+      shape:cloneShape(SHAPES[name]),
+      x:Math.floor(COLS / 2) - 2,
+      y:0
+    };
+  }
+
+  function reset(){
+    board.forEach(row => row.fill(0));
+    bag = [];
+    current = newPiece();
+    next = newPiece();
+
+    score = 0;
+    lines = 0;
+    level = 1;
+
+    dropTimer = 0;
+    gameOver = false;
+    paused = false;
+
+    clearState = 'playing';
+    clearingRows = [];
+    blinkTimer = 0;
+    blinkPhase = 0;
+    dropAnim = 0;
+    dropPixels = 0;
+    boardBeforeDrop = null;
+  }
+
+  function collide(piece=current, dx=0, dy=0, shape=piece.shape){
+    return shape.some((row,y) => row.some((value,x) => {
+      if(!value) return false;
+
+      const nx = piece.x + x + dx;
+      const ny = piece.y + y + dy;
+
+      return (
+        nx < 0 ||
+        nx >= COLS ||
+        ny >= ROWS ||
+        (ny >= 0 && board[ny][nx])
+      );
     }));
   }
-  function merge(){ current.shape.forEach((row,y)=>row.forEach((v,x)=>{ if(v && current.y+y>=0) board[current.y+y][current.x+x]=v; })); }
+
+  function merge(){
+    current.shape.forEach((row,y) => {
+      row.forEach((value,x) => {
+        if(value && current.y + y >= 0){
+          board[current.y + y][current.x + x] = value;
+        }
+      });
+    });
+  }
+
   function rotate(){
-    const old=current.shape, rotated=old[0].map((_,i)=>old.map(r=>r[i]).reverse());
-    current.shape=rotated;
-    if(collide()){ current.x++; if(collide()){ current.x-=2; if(collide()){ current.x++; current.shape=old; } } }
+    if(clearState !== 'playing') return;
+
+    const old = current.shape;
+    const rotated = old[0].map((_,i) => old.map(row => row[i]).reverse());
+
+    current.shape = rotated;
+
+    if(collide()){
+      current.x++;
+
+      if(collide()){
+        current.x -= 2;
+
+        if(collide()){
+          current.x++;
+          current.shape = old;
+        }
+      }
+    }
   }
-  function hardDrop(){ if(clearingRows.length) return; while(!collide(current,0,1)) current.y++; lock(); }
-  function lock(){ merge(); startClearOrSpawn(); }
 
-  function startClearOrSpawn(){
-    const full=[]; for(let y=0;y<ROWS;y++) if(board[y].every(Boolean)) full.push(y);
-    if(full.length){ clearingRows=full; clearFlash=0; clearPhase=0; }
-    else spawnNext();
+  function moveDown(){
+    if(clearState !== 'playing') return;
+
+    if(!collide(current,0,1)){
+      current.y++;
+    } else {
+      lockPiece();
+    }
   }
-  function finishClear(){
-    // After the blink, build the exact post-clear board and animate every
-    // surviving block from its old row into its new row. The next piece does
-    // not spawn until this drop animation finishes.
-    const before = board.map(r=>r.slice());
-    const rowsToClear = clearingRows.slice().sort((a,b)=>a-b);
-    const clearSet = new Set(rowsToClear);
-    const n = rowsToClear.length;
 
-    pendingBoard = Array.from({length:ROWS}, () => Array(COLS).fill(0));
-    dropCells = [];
+  function hardDrop(){
+    if(clearState !== 'playing') return;
 
-    for(let y=0;y<ROWS;y++){
-      if(clearSet.has(y)) continue;
-      const dropBy = rowsToClear.filter(cy => cy > y).length;
-      const destY = y + dropBy;
-      for(let x=0;x<COLS;x++){
-        const v = before[y][x];
-        if(!v) continue;
-        pendingBoard[destY][x] = v;
-        dropCells.push({x, fromY:y, toY:destY, v});
+    while(!collide(current,0,1)){
+      current.y++;
+      score += 2;
+    }
+
+    lockPiece();
+  }
+
+  function lockPiece(){
+    merge();
+    const completed = findCompletedRows();
+
+    if(completed.length){
+      startRowBlink(completed);
+    } else {
+      spawnNextPiece();
+    }
+  }
+
+  function findCompletedRows(){
+    const completed = [];
+
+    for(let y = 0; y < ROWS; y++){
+      if(board[y].every(Boolean)){
+        completed.push(y);
       }
     }
 
-    board.forEach(r=>r.fill(0));
-    fallAnim = 0;
-    lines += n; score += [0,40,100,300,1200][n] * level; level = 1 + Math.floor(lines/10);
-    clearingRows=[];
+    return completed;
   }
-  function spawnNext(){ current=next; next=newPiece(); if(collide()) gameOver=true; }
 
-  function moveDown(){ if(clearingRows.length || dropCells) return; if(!collide(current,0,1)) current.y++; else lock(); }
+  function startRowBlink(rows){
+    clearState = 'blinking';
+    clearingRows = rows.slice();
+    blinkTimer = 0;
+    blinkPhase = 0;
+    dropTimer = 0;
+  }
+
+  function removeCompletedRows(){
+    /*
+      Save the full board before row removal so the draw loop can show
+      the old blocks sliding down into the new board position.
+    */
+    boardBeforeDrop = board.map(row => row.slice());
+
+    const removed = new Set(clearingRows);
+    const keptRows = [];
+
+    for(let y = 0; y < ROWS; y++){
+      if(!removed.has(y)){
+        keptRows.push(board[y].slice());
+      }
+    }
+
+    const missing = ROWS - keptRows.length;
+    const emptyRows = Array.from({length:missing}, () => Array(COLS).fill(0));
+    const newBoard = emptyRows.concat(keptRows);
+
+    for(let y = 0; y < ROWS; y++){
+      board[y] = newBoard[y].slice();
+    }
+
+    lines += clearingRows.length;
+    score += [0,40,100,300,1200][clearingRows.length] * level;
+    level = 1 + Math.floor(lines / 10);
+
+    dropPixels = clearingRows.length;
+    clearingRows = [];
+
+    clearState = 'dropping';
+    dropAnim = 0;
+  }
+
+  function finishDropAnimation(){
+    clearState = 'playing';
+    dropAnim = 0;
+    dropPixels = 0;
+    boardBeforeDrop = null;
+    spawnNextPiece();
+  }
+
+  function spawnNextPiece(){
+    current = next;
+    next = newPiece();
+
+    if(collide()){
+      gameOver = true;
+    }
+  }
+
   function input(key){
-    if(gameOver && (key==='Enter'||key===' '||key==='tap')) return reset();
-    if(key==='p' || key==='P') { paused=!paused; return; }
-    if(paused || gameOver || clearingRows.length || dropCells) return;
-    if(key==='ArrowLeft' && !collide(current,-1,0)) current.x--;
-    if(key==='ArrowRight' && !collide(current,1,0)) current.x++;
-    if(key==='ArrowDown') { moveDown(); score += 1; }
-    if(key==='ArrowUp') rotate();
-    if(key===' ') hardDrop();
+    if(gameOver && (key === 'Enter' || key === ' ' || key === 'tap')){
+      reset();
+      return;
+    }
+
+    if(key === 'p' || key === 'P'){
+      paused = !paused;
+      return;
+    }
+
+    if(paused || gameOver || clearState !== 'playing'){
+      return;
+    }
+
+    if(key === 'ArrowLeft' && !collide(current,-1,0)){
+      current.x--;
+    }
+
+    if(key === 'ArrowRight' && !collide(current,1,0)){
+      current.x++;
+    }
+
+    if(key === 'ArrowDown'){
+      moveDown();
+      score += 1;
+    }
+
+    if(key === 'ArrowUp'){
+      rotate();
+    }
+
+    if(key === ' '){
+      hardDrop();
+    }
   }
 
-  function resize(){ const r=canvas.getBoundingClientRect(); canvas.width=Math.max(320,Math.floor(r.width)); canvas.height=Math.max(240,Math.floor(r.height)); ctx.imageSmoothingEnabled=false; draw(); }
+  function resize(){
+    const rect = canvas.getBoundingClientRect();
+
+    canvas.width = Math.max(320,Math.floor(rect.width));
+    canvas.height = Math.max(240,Math.floor(rect.height));
+
+    ctx.imageSmoothingEnabled = false;
+    draw();
+  }
+
   addEventListener('resize', resize);
 
   function lcdText(text,x,y,size=11,align='left'){
-    ctx.save(); ctx.fillStyle='rgba(18,26,8,.96)'; ctx.font=`bold ${size}px "Courier New", monospace`; ctx.textAlign=align; ctx.textBaseline='top'; ctx.fillText(text,x,y); ctx.restore();
+    ctx.save();
+    ctx.fillStyle = 'rgba(18,26,8,.96)';
+    ctx.font = `bold ${size}px "Courier New", monospace`;
+    ctx.textAlign = align;
+    ctx.textBaseline = 'top';
+    ctx.fillText(text,x,y);
+    ctx.restore();
   }
-  function cell(px,py,s,v=1,alpha=1){
-    ctx.save(); ctx.globalAlpha=alpha; ctx.fillStyle='rgba(19,26,8,.96)'; ctx.fillRect(px,py,s-1,s-1);
-    ctx.fillStyle='rgba(105,121,58,.32)'; const inset=Math.max(2,Math.floor(s*.22)); ctx.fillRect(px+inset,py+inset,s-inset*2-1,s-inset*2-1);
-    ctx.strokeStyle='rgba(5,8,2,.65)'; ctx.lineWidth=Math.max(1,Math.floor(s/12)); ctx.strokeRect(px+.5,py+.5,s-2,s-2); ctx.restore();
+
+  function drawCell(px,py,size,value=1,alpha=1){
+    ctx.save();
+    ctx.globalAlpha = alpha;
+
+    ctx.fillStyle = 'rgba(19,26,8,.96)';
+    ctx.fillRect(px,py,size - 1,size - 1);
+
+    ctx.fillStyle = 'rgba(105,121,58,.32)';
+    const inset = Math.max(2,Math.floor(size * .22));
+    ctx.fillRect(
+      px + inset,
+      py + inset,
+      size - inset * 2 - 1,
+      size - inset * 2 - 1
+    );
+
+    ctx.strokeStyle = 'rgba(5,8,2,.65)';
+    ctx.lineWidth = Math.max(1,Math.floor(size / 12));
+    ctx.strokeRect(px + .5,py + .5,size - 2,size - 2);
+
+    ctx.restore();
   }
-  function drawShape(shape,x,y,s,ox,oy,alpha=1){ shape.forEach((row,yy)=>row.forEach((v,xx)=>{ if(v) cell(ox+(x+xx)*s, oy+(y+yy)*s, s, v, alpha); })); }
+
+  function drawShape(shape,x,y,size,offsetX,offsetY,alpha=1){
+    shape.forEach((row,yy) => {
+      row.forEach((value,xx) => {
+        if(value){
+          drawCell(
+            offsetX + (x + xx) * size,
+            offsetY + (y + yy) * size,
+            size,
+            value,
+            alpha
+          );
+        }
+      });
+    });
+  }
+
+  function drawBoard(source,offsetX,offsetY,size,yOffsetCells=0,alpha=1){
+    source.forEach((row,y) => {
+      row.forEach((value,x) => {
+        if(value){
+          drawCell(
+            offsetX + x * size,
+            offsetY + (y + yOffsetCells) * size,
+            size,
+            value,
+            alpha
+          );
+        }
+      });
+    });
+  }
+
+  function drawLogoWatermark(ox,oy,playW,playH){
+    if(!logoImage.complete || !logoImage.naturalWidth) return;
+
+    ctx.save();
+
+    const maxW = playW * 0.58;
+    const maxH = playH * 0.28;
+    const ratio = logoImage.naturalWidth / logoImage.naturalHeight;
+
+    let logoW = maxW;
+    let logoH = logoW / ratio;
+
+    if(logoH > maxH){
+      logoH = maxH;
+      logoW = logoH * ratio;
+    }
+
+    const logoX = ox + (playW - logoW) / 2;
+    const logoY = oy + (playH - logoH) / 2;
+
+    ctx.globalAlpha = 0.10;
+    ctx.globalCompositeOperation = 'multiply';
+    ctx.filter = 'grayscale(1) contrast(1.4) brightness(.48)';
+    ctx.drawImage(logoImage,logoX,logoY,logoW,logoH);
+
+    ctx.restore();
+  }
 
   function draw(){
-    const w=canvas.width, h=canvas.height;
-    ctx.fillStyle='#718049'; ctx.fillRect(0,0,w,h);
+    const w = canvas.width;
+    const h = canvas.height;
+
+    ctx.fillStyle = '#718049';
+    ctx.fillRect(0,0,w,h);
+
     const isPhone = matchMedia('(max-width:700px)').matches;
-    const margin = Math.max(8, Math.floor(Math.min(w,h)*.035));
-    const sideW = isPhone ? Math.max(72, Math.floor(w*.24)) : Math.max(86, Math.floor(w*.26));
-    const boardH = h - margin*2;
-    const block = Math.floor(Math.min((w - margin*3 - sideW)/COLS, boardH/ROWS));
-    const playW = block*COLS, playH = block*ROWS;
-    const ox = isPhone ? margin : Math.floor((w - playW - sideW - margin)/2);
-    const oy = Math.floor((h - playH)/2);
+
+    const margin = Math.max(8,Math.floor(Math.min(w,h) * .035));
+    const sideW = isPhone ? Math.max(72,Math.floor(w * .24)) : Math.max(86,Math.floor(w * .26));
+
+    const boardH = h - margin * 2;
+    const block = Math.floor(Math.min((w - margin * 3 - sideW) / COLS, boardH / ROWS));
+
+    const playW = block * COLS;
+    const playH = block * ROWS;
+
+    const ox = isPhone ? margin : Math.floor((w - playW - sideW - margin) / 2);
+    const oy = Math.floor((h - playH) / 2);
     const panelX = ox + playW + margin;
 
-    // old LCD texture
-    ctx.fillStyle='rgba(25,32,12,.08)'; for(let y=0;y<h;y+=3) ctx.fillRect(0,y,w,1);
-    ctx.fillStyle='rgba(255,255,255,.035)'; for(let x=0;x<w;x+=5) ctx.fillRect(x,0,1,h);
+    // LCD texture
+    ctx.fillStyle = 'rgba(25,32,12,.08)';
+    for(let y = 0; y < h; y += 3){
+      ctx.fillRect(0,y,w,1);
+    }
 
-    ctx.strokeStyle='rgba(20,27,9,.95)'; ctx.lineWidth=Math.max(2,Math.floor(block*.15)); ctx.strokeRect(ox-5,oy-5,playW+10,playH+10);
-    ctx.lineWidth=Math.max(1,Math.floor(block*.07));
-    for(let y=0;y<ROWS;y++){ cell(ox-5-block*.9, oy+y*block, block*.65); cell(ox+playW+5+block*.25, oy+y*block, block*.65); }
+    ctx.fillStyle = 'rgba(255,255,255,.035)';
+    for(let x = 0; x < w; x += 5){
+      ctx.fillRect(x,0,1,h);
+    }
 
-    const drawBoard = (source, yOffset=0, alpha=1) => source.forEach((row,y)=>row.forEach((v,x)=>{ if(v) cell(ox+x*block, oy+(y+yOffset)*block, block, v, alpha); }));
-    if(dropCells){
-      const ease = 1 - Math.pow(1 - Math.min(1, fallAnim), 3);
-      dropCells.forEach(c => cell(ox+c.x*block, oy+(c.fromY + (c.toY-c.fromY)*ease)*block, block, c.v, 1));
+    // Playfield border
+    ctx.strokeStyle = 'rgba(20,27,9,.95)';
+    ctx.lineWidth = Math.max(2,Math.floor(block * .15));
+    ctx.strokeRect(ox - 5,oy - 5,playW + 10,playH + 10);
+
+    // Decorative side columns
+    ctx.lineWidth = Math.max(1,Math.floor(block * .07));
+    for(let y = 0; y < ROWS; y++){
+      drawCell(ox - 5 - block * .9,oy + y * block,block * .65);
+      drawCell(ox + playW + 5 + block * .25,oy + y * block,block * .65);
+    }
+
+    // Branding watermark centered in the tall 10x20 playfield.
+    // Blocks and falling pieces are drawn after this, so they float over the logo.
+    drawLogoWatermark(ox,oy,playW,playH);
+
+    if(clearState === 'dropping' && boardBeforeDrop){
+      const slide = Math.sin(Math.min(1,dropAnim) * Math.PI / 2);
+      drawBoard(boardBeforeDrop,ox,oy,block,slide * dropPixels,.28);
+      drawBoard(board,ox,oy,block,0,1);
     } else {
-      drawBoard(board, 0, 1);
+      drawBoard(board,ox,oy,block,0,1);
     }
 
-    if(clearingRows.length){
-      const on = clearPhase % 2 === 0;
-      clearingRows.forEach(y=>{ ctx.fillStyle = on ? 'rgba(18,26,8,.95)' : 'rgba(114,128,73,.85)'; ctx.fillRect(ox, oy+y*block, playW, block-1); });
-    }
-    if(!gameOver && !paused && !clearingRows.length && !dropCells) drawShape(current.shape,current.x,current.y,block,ox,oy);
+    if(clearState === 'blinking'){
+      const showDark = blinkPhase % 2 === 0;
 
-    function box(y,title,value){ ctx.strokeStyle='rgba(20,27,9,.95)'; ctx.lineWidth=2; ctx.strokeRect(panelX,y,sideW-margin,Math.max(40,block*3.2)); lcdText(title,panelX+(sideW-margin)/2,y+8,Math.max(10,block*.7),'center'); lcdText(value,panelX+(sideW-margin)/2,y+Math.max(24,block*1.45),Math.max(11,block*.75),'center'); }
-    box(oy+6,'SCORE',String(score).padStart(6,'0'));
-    box(oy+6+block*4.1,'LEVEL',String(level).padStart(2,'0'));
-    box(oy+6+block*8.2,'LINES',String(lines).padStart(3,'0'));
-    const nx=panelX, ny=oy+playH-block*5.2, nw=sideW-margin;
-    ctx.strokeRect(nx,ny,nw,block*4.8); ctx.strokeRect(nx+5,ny+5,nw-10,block*4.8-10);
-    drawShape(next.shape,1,1,Math.max(8,Math.floor(block*.78)),nx+Math.floor(nw*.17),ny+Math.floor(block*.75));
+      clearingRows.forEach(y => {
+        ctx.fillStyle = showDark ? 'rgba(18,26,8,.96)' : 'rgba(114,128,73,.92)';
+        ctx.fillRect(ox,oy + y * block,playW,block - 1);
+      });
+    }
+
+    if(!gameOver && !paused && clearState === 'playing'){
+      drawShape(current.shape,current.x,current.y,block,ox,oy);
+    }
+
+    function infoBox(y,title,value){
+      const boxW = sideW - margin;
+      const boxH = Math.max(40,block * 3.2);
+
+      ctx.strokeStyle = 'rgba(20,27,9,.95)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(panelX,y,boxW,boxH);
+
+      lcdText(title,panelX + boxW / 2,y + 8,Math.max(9,block * .62),'center');
+      lcdText(value,panelX + boxW / 2,y + Math.max(24,block * 1.45),Math.max(10,block * .68),'center');
+    }
+
+    infoBox(oy + 6,'SCORE',String(score).padStart(6,'0'));
+    infoBox(oy + 6 + block * 4.1,'LEVEL',String(level).padStart(2,'0'));
+    infoBox(oy + 6 + block * 8.2,'LINES',String(lines).padStart(3,'0'));
+
+    const nx = panelX;
+    const ny = oy + playH - block * 5.2;
+    const nw = sideW - margin;
+
+    ctx.strokeRect(nx,ny,nw,block * 4.8);
+    ctx.strokeRect(nx + 5,ny + 5,nw - 10,block * 4.8 - 10);
+
+    drawShape(
+      next.shape,
+      1,
+      1,
+      Math.max(8,Math.floor(block * .78)),
+      nx + Math.floor(nw * .17),
+      ny + Math.floor(block * .75)
+    );
 
     if(gameOver || paused){
-      ctx.fillStyle='rgba(112,128,73,.86)'; ctx.fillRect(ox+block,oy+block*8,playW-block*2,block*4);
-      ctx.strokeStyle='rgba(20,27,9,.95)'; ctx.strokeRect(ox+block,oy+block*8,playW-block*2,block*4);
-      lcdText(gameOver?'GAME OVER':'PAUSED',ox+playW/2,oy+block*8.8,Math.max(13,block*.9),'center');
-      lcdText('ENTER / TAP',ox+playW/2,oy+block*10.15,Math.max(9,block*.55),'center');
+      ctx.fillStyle = 'rgba(112,128,73,.86)';
+      ctx.fillRect(ox + block,oy + block * 8,playW - block * 2,block * 4);
+
+      ctx.strokeStyle = 'rgba(20,27,9,.95)';
+      ctx.strokeRect(ox + block,oy + block * 8,playW - block * 2,block * 4);
+
+      lcdText(gameOver ? 'GAME OVER' : 'PAUSED',ox + playW / 2,oy + block * 8.8,Math.max(13,block * .9),'center');
+      lcdText('ENTER / TAP',ox + playW / 2,oy + block * 10.15,Math.max(9,block * .55),'center');
     }
   }
 
-  function update(t=0){
-    const dt = Math.min(80, t-lastTime); lastTime=t;
+  function update(time=0){
+    const dt = Math.min(80,time - lastTime);
+    lastTime = time;
+
     if(!paused && !gameOver){
-      if(clearingRows.length){
-        clearFlash += dt;
-        if(clearFlash>105){ clearFlash=0; clearPhase++; if(clearPhase>=6) finishClear(); }
-      }
-      else if(dropCells){
-        fallAnim += dt/180;
-        if(fallAnim >= 1){
-          for(let y=0;y<ROWS;y++) board[y] = pendingBoard[y].slice();
-          dropCells=null; pendingBoard=null; fallAnim=0; dropTimer=0;
-          spawnNext();
+      if(clearState === 'blinking'){
+        blinkTimer += dt;
+
+        if(blinkTimer >= 105){
+          blinkTimer = 0;
+          blinkPhase++;
+
+          // 6 phases = 3 full flashes, then remove row.
+          if(blinkPhase >= 6){
+            removeCompletedRows();
+          }
+        }
+      } else if(clearState === 'dropping'){
+        dropAnim += dt / 220;
+
+        if(dropAnim >= 1){
+          finishDropAnimation();
+        }
+      } else {
+        dropTimer += dt;
+
+        if(dropTimer > Math.max(95,720 - (level - 1) * 55)){
+          moveDown();
+          dropTimer = 0;
         }
       }
-      else { dropTimer += dt; if(dropTimer > Math.max(95, 720-(level-1)*55)){ moveDown(); dropTimer=0; } }
     }
-    draw(); requestAnimationFrame(update);
+
+    draw();
+    requestAnimationFrame(update);
   }
 
-  addEventListener('keydown', e => { if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' '].includes(e.key)) e.preventDefault(); input(e.key); });
-  let lastBottomTap=0;
-  document.querySelectorAll('.zone').forEach(z=>z.addEventListener('pointerdown', e=>{
-    e.preventDefault();
-    const k=z.dataset.key;
-    if(gameOver) return input('tap');
-    if(k==='ArrowDown'){
-      const now=Date.now();
-      if(now-lastBottomTap<300){ input(' '); lastBottomTap=0; }
-      else { input('ArrowDown'); lastBottomTap=now; }
-    } else input(k);
-  }));
+  addEventListener('keydown', event => {
+    if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' '].includes(event.key)){
+      event.preventDefault();
+    }
 
-  reset(); resize(); requestAnimationFrame(update);
+    input(event.key);
+  });
+
+  let lastBottomTap = 0;
+
+  document.querySelectorAll('.zone').forEach(zone => {
+    zone.addEventListener('pointerdown', event => {
+      event.preventDefault();
+
+      const key = zone.dataset.key;
+
+      if(gameOver){
+        input('tap');
+        return;
+      }
+
+      if(key === 'ArrowDown'){
+        const now = Date.now();
+
+        if(now - lastBottomTap < 300){
+          input(' ');
+          lastBottomTap = 0;
+        } else {
+          input('ArrowDown');
+          lastBottomTap = now;
+        }
+      } else {
+        input(key);
+      }
+    });
+  });
+
+  reset();
+  resize();
+  requestAnimationFrame(update);
 })();
 </script>
 </body>
