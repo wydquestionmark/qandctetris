@@ -873,5 +873,29 @@ onValue(counterRef, snapshot => {
 });
 
 </script>  
+  <script>
+window.addEventListener("load", () => {
+
+  const music = document.getElementById("bgMusic");
+
+  music.volume = 0.35;
+
+  music.play().catch(() => {
+
+    /*
+      Mobile browsers usually require
+      a user interaction before audio.
+    */
+
+    document.addEventListener(
+      "pointerdown",
+      () => music.play(),
+      { once:true }
+    );
+
+  });
+
+});
+</script>
 </body>
 </html>
